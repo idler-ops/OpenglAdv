@@ -269,7 +269,7 @@
 //
 //#pragma region Init VAO，VBO，EBO and load data
 //	//Mesh cube(cubeVertices);
-//	//Model model(exePath.substr(0, exePath.find_last_of('\\')) + "\\model\\nanosuit.obj");	//文件放在执行文件同级目录的Debug目录下
+//	Model model(exePath.substr(0, exePath.find_last_of('\\')) + "\\model\\nanosuit.obj");	//文件放在执行文件同级目录的Debug目录下
 //
 //	//下面流程：bind VAO -> bind VBO -> copy vertices array in a buffer -> set vertex attributes pointers -> draw the object
 //
@@ -363,8 +363,8 @@
 //
 //#pragma region Init and load textures
 //	//事实上，TEXTURE_2D包括多个槽，可以同时将几个texture buffer的内容绑定上，让GPU在之后的shader中可以读取
-//	unsigned int TexBufferA;
-//	TexBufferA = loadImageToGUP("container.jpg", GL_RGB, GL_RGB, 0);
+//	//unsigned int TexBufferA;
+//	//TexBufferA = loadImageToGUP("container.jpg", GL_RGB, GL_RGB, 0);
 //	unsigned int TexBufferB;	//第二个texture buffer要在第一个完成绑定后进行处理
 //	TexBufferB = loadImageToGUP("awesomeface.png", GL_RGBA, GL_RGBA, 3);
 //	unsigned int PlaneTexBuffer;
@@ -537,9 +537,9 @@
 //		glBindVertexArray(planeVAO);
 //		glDrawArrays(GL_TRIANGLES, 0, 6);
 //
-//
+//		myMaterial->shader->SetUniform1i("material.diffuse", 3);
 //		//cube.Draw(myMaterial->shader);
-//		//model.Draw(myMaterial->shader);
+//		model.Draw(myMaterial->shader);
 //
 //		glfwSwapBuffers(window);		//交换两个颜色暂存区块（每个像素都存在两个颜色暂存区块）
 //		//当只往单个buffer写入时，图像结果可能会闪烁。为了克服问题，轮流使用双buffer去渲染。
