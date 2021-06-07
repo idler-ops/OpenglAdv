@@ -16,22 +16,12 @@ in VS_OUT {
     vec4 FragPosLightSpace;
 } fs_in;
 
-struct Material {
-	vec3 ambient;
-//	vec3 diffuse;
-	sampler2D diffuse;
-//	vec3 specular;
-	sampler2D specular;
-	float shininess;
-};
-
 struct LightDirectional {
 	vec3 pos;
 	vec3 color;
 	vec3 dirToLight;	//保证它是单位向量
 };
 uniform LightDirectional lightD;	//平行光源
-uniform Material material;
 
 uniform sampler2D diffuseTexture;
 uniform sampler2D shadowMap;
@@ -106,12 +96,12 @@ float CalcSpecIntensity(vec3 lightPos, vec3 lightDir, vec3 uNormal, vec3 dirToCa
 vec3 CalcLightDirectional(LightDirectional light, vec3 uNormal, vec3 dirToCamera) {
 	// diffuse		max(dot(L, N), 0)
 	float diffuseIntensity = max(dot(light.dirToLight, uNormal), 0);
-	vec3 diffColor = diffuseIntensity * lightColor * texture(material.diffuse, fs_in.TexCoords).rgb;
+	vec3 diffColor = diffuseIntensity * lightColor * texture(diffuseTexture, fs_in.TexCoords).rgb;
 
 	// specular		pow(max(dot(R, Cam), 0), shininess)
 	float specIntensity = CalcSpecIntensity(light.pos, light.dirToLight, uNormal, dirToCamera);
 //	vec3 specColor = specIntensity * light.color * texture(material.specular, fs_in.TexCoords).rgb;
-	vec3 specColor = specIntensity * lightColor * texture(material.diffuse, fs_in.TexCoords).rgb;
+	vec3 specColor = specIntensity * lightColor * texture(diffuseTexture, fs_in.TexCoords).rgb;
 
 	float shadow = shadows ? ShadowCalculation(fs_in.FragPosLightSpace) : 0.0;                      
     shadow = min(shadow, 0.75); // reduce shadow strength a little: allow some diffuse/specular light in shadowed regions
@@ -123,7 +113,7 @@ vec3 CalcLightDirectional(LightDirectional light, vec3 uNormal, vec3 dirToCamera
 void main()
 {
 	vec3 viewDir = normalize(viewPos - fs_in.FragPos);
-    vec3 color = texture(material.diffuse, fs_in.TexCoords).rgb;
+    vec3 color = texture(diffuseTexture, fs_in.TexCoords).rgb;
     vec3 normal = normalize(fs_in.Normal);
 
     // Ambient

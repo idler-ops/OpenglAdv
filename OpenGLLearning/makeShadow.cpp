@@ -121,17 +121,10 @@ Camera camera(glm::vec3(0.0f, 0.0f, 3.0f), glm::radians(15.0f), glm::radians(180
 #pragma endregion
 
 #pragma region Light Declare
-
-//LightDirectional lightD(
-//	true,
-//	glm::vec3(-2.0f, 4.0f, -1.0f),
-//	glm::vec3(-2.0f, 4.0f, -1.0f),
-//	glm::vec3(1.0f, 1.0f, 1.0f));
-
 LightDirectional lightD(
 	true,
-	glm::vec3(-20.0f, 20.0f, -5.0f),
-	glm::vec3(-4.0f, 4.0f, -1.0f),
+	glm::vec3(-2.0f, 4.0f, -1.0f),
+	glm::vec3(-2.0f, 4.0f, -1.0f),
 	glm::vec3(1.0f, 1.0f, 1.0f));
 
 LightDirectional light(
@@ -282,14 +275,12 @@ int main(int argc, char *argv[]) {
 
 	//newly added
 	myShader->use();
-	myShader->SetUniform1i("material.diffuse", 0);
+	myShader->SetUniform1i("diffuseTexture", 0);
 	myShader->SetUniform1i("shadowMap", 1);
 
 #pragma endregion
 
 #pragma region Init VAO，VBO，EBO and load data
-	Model model(exePath.substr(0, exePath.find_last_of('\\')) + "\\model\\nanosuit.obj");	//文件放在执行文件同级目录的Debug目录下
-
 	unsigned int cubeVAO;
 	glGenVertexArrays(1, &cubeVAO);	//参数1：返回的VAO个数，参数2：用来接收VAO序号，接收多个时参数2应为数组
 	glBindVertexArray(cubeVAO);
@@ -303,8 +294,8 @@ int main(int argc, char *argv[]) {
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)0);		//这一步是将VBO放入VAO中的attribute pointer（槽位）
-	glEnableVertexAttribArray(3);	//激活0号槽位
-	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(3 * sizeof(float)));
+	glEnableVertexAttribArray(1);	//激活0号槽位
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(3 * sizeof(float)));
 	glEnableVertexAttribArray(2);
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(6 * sizeof(float)));
 	//（为方便记忆，固定VAO的0号槽放坐标信息，1号槽放颜色信息，2号槽放纹理信息，3号放法向量信息）
@@ -319,8 +310,8 @@ int main(int argc, char *argv[]) {
 	glBufferData(GL_ARRAY_BUFFER, sizeof(planeVertices), planeVertices, GL_STATIC_DRAW);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)0);
-	glEnableVertexAttribArray(3);
-	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(3 * sizeof(float)));
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(3 * sizeof(float)));
 	glEnableVertexAttribArray(2);
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(6 * sizeof(float)));
 	glBindVertexArray(0);
@@ -335,8 +326,8 @@ int main(int argc, char *argv[]) {
 	glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), quadVertices, GL_STATIC_DRAW);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)0);
-	glEnableVertexAttribArray(3);
-	glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)(3 * sizeof(float)));
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)(3 * sizeof(float)));
 	glBindVertexArray(0);
 #pragma endregion
 
@@ -386,12 +377,10 @@ int main(int argc, char *argv[]) {
 
 	unsigned int woodTexture;
 	woodTexture = loadImageToGUP("wood.png", GL_RGB, GL_RGB, 0);
-	unsigned int faceTexture;
-	faceTexture = loadImageToGUP("awesomeface.png", GL_RGBA, GL_RGBA, 3);
 
 #pragma endregion
 
-	glm::mat4 viewMat, projMat, modelMat;
+	glm::mat4 viewMat, projMat, model;
 
 	while (!glfwWindowShouldClose(window)) {
 
@@ -405,12 +394,8 @@ int main(int argc, char *argv[]) {
 		//lightD.position.y = 5.0 + cos(glfwGetTime()) * 1.0f;
 
 		// 1. 从光的视角渲染深度贴图
-
-//		GLfloat near_plane = 1.0f, far_plane = 7.5f;
-//		glm::mat4 lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
-
-		GLfloat near_plane = -40.0f, far_plane = 40.0f;
-		glm::mat4 lightProjection = glm::ortho(-30.0f, 30.0f, -30.0f, 30.0f, near_plane, far_plane);
+		GLfloat near_plane = 1.0f, far_plane = 7.5f;
+		glm::mat4 lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
 		//为每个物体设置合适的投影和视图矩阵；将为光源使用正交投影矩阵，透视图将没有任何变形
 		//lightProjection = glm::perspective(45.0f, (GLfloat)SHADOW_WIDTH / (GLfloat)SHADOW_HEIGHT, near_plane, far_plane);
 		//Note that if you use a perspective projection matrix you'll have to change the light position as the current light position isn't enough to reflect the whole scene.
@@ -431,54 +416,39 @@ int main(int argc, char *argv[]) {
 
 		// render scene with depthShader
 
-		// draw model
-		modelMat = glm::mat4(1.0f);
-		depthShader->SetUniform4fv("model", modelMat);
-		myShader->SetUniform1i("material.diffuse", 3);
-		model.Draw(depthShader);
-		myShader->SetUniform1i("material.diffuse", 0);
-
 		// Floor
-		modelMat = glm::mat4(1.0f);
-		depthShader->SetUniform4fv("model", modelMat);
+		model = glm::mat4(1.0f);
+		depthShader->SetUniform4fv("model", model);
 		glBindVertexArray(planeVAO);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 
 		// Cubes
-		modelMat = glm::mat4(1.0f);
-		modelMat = glm::translate(modelMat, glm::vec3(0.0f, 1.5f, 0.0));
-		//model = glm::scale(modelMat, glm::vec3(0.5f));
-		depthShader->SetUniform4fv("model", modelMat);
+		model = glm::mat4(1.0f);
+		model = glm::translate(model, glm::vec3(0.0f, 1.5f, 0.0));
+		//model = glm::scale(model, glm::vec3(0.5f));
+		depthShader->SetUniform4fv("model", model);
 		glBindVertexArray(cubeVAO);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 		glBindVertexArray(0);
 
-		modelMat = glm::mat4(1.0f);
-		modelMat = glm::translate(modelMat, glm::vec3(2.0f, 0.0f, 1.0));
-		//model = glm::scale(modelMat, glm::vec3(0.5f));
-		depthShader->SetUniform4fv("model", modelMat);
+		model = glm::mat4(1.0f);
+		model = glm::translate(model, glm::vec3(2.0f, 0.0f, 1.0));
+		//model = glm::scale(model, glm::vec3(0.5f));
+		depthShader->SetUniform4fv("model", model);
 		glBindVertexArray(cubeVAO);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 		glBindVertexArray(0);
 
-		modelMat = glm::mat4(1.0f);
-		modelMat = glm::translate(modelMat, glm::vec3(-1.0f, 0.0f, 2.0));
-		modelMat = glm::rotate(modelMat, glm::radians(60.0f), glm::normalize(glm::vec3(1.0, 0.0, 1.0)));
-		modelMat = glm::scale(modelMat, glm::vec3(0.5));
-		depthShader->SetUniform4fv("model", modelMat);
+		model = glm::mat4(1.0f);
+		model = glm::translate(model, glm::vec3(-1.0f, 0.0f, 2.0));
+		model = glm::rotate(model, glm::radians(60.0f), glm::normalize(glm::vec3(1.0, 0.0, 1.0)));
+		model = glm::scale(model, glm::vec3(0.5));
+		depthShader->SetUniform4fv("model", model);
 		glBindVertexArray(cubeVAO);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 		glBindVertexArray(0);
-
-		modelMat = glm::mat4(1.0f);
-		modelMat = glm::translate(modelMat, glm::vec3(-15.0f, 15.0f, -2.0f));
-		myShader->SetUniform4fv("model", modelMat);
-		glBindVertexArray(cubeVAO);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-		glBindVertexArray(0);
-
 		//到这里，深度缓冲被更新，得到了光线视角下的深度图
-
+		
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 		// 2. 正常渲染场景
@@ -503,48 +473,34 @@ int main(int argc, char *argv[]) {
 
 		// render scene with myShader
 		
-		// draw model
-		modelMat = glm::mat4(1.0f);
-		myShader->SetUniform4fv("model", modelMat);
-		myShader->SetUniform1i("material.diffuse", 3);
-		model.Draw(myShader);
-		myShader->SetUniform1i("material.diffuse", 0);
-
 		// Floor
-		modelMat = glm::mat4(1.0f);
-		myShader->SetUniform4fv("model", modelMat);
+		model = glm::mat4(1.0f);
+		myShader->SetUniform4fv("model", model);
 		glBindVertexArray(planeVAO);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 
 		// Cubes
-		modelMat = glm::mat4(1.0f);
-		modelMat = glm::translate(modelMat, glm::vec3(0.0f, 1.5f, 0.0));
-		// modelMat = glm::scale(modelMat, glm::vec3(0.5f));
-		myShader->SetUniform4fv("model", modelMat);
-		glBindVertexArray(cubeVAO);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-		glBindVertexArray(0);
-		
-		modelMat = glm::mat4(1.0f);
-		modelMat = glm::translate(modelMat, glm::vec3(2.0f, 0.0f, 1.0));
-		// modelMat = glm::scale(model, glm::vec3(0.5f));
-		myShader->SetUniform4fv("model", modelMat);
+		model = glm::mat4(1.0f);
+		model = glm::translate(model, glm::vec3(0.0f, 1.5f, 0.0));
+		// model = glm::scale(model, glm::vec3(0.5f));
+		myShader->SetUniform4fv("model", model);
 		glBindVertexArray(cubeVAO);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 		glBindVertexArray(0);
 
-		modelMat = glm::mat4(1.0f);
-		modelMat = glm::translate(modelMat, glm::vec3(-1.0f, 0.0f, 2.0));
-		modelMat = glm::rotate(modelMat, glm::radians(60.0f), glm::normalize(glm::vec3(1.0, 0.0, 1.0)));
-		modelMat = glm::scale(modelMat, glm::vec3(0.5));
-		myShader->SetUniform4fv("model", modelMat);
+		model = glm::mat4(1.0f);
+		model = glm::translate(model, glm::vec3(2.0f, 0.0f, 1.0));
+		// model = glm::scale(model, glm::vec3(0.5f));
+		myShader->SetUniform4fv("model", model);
 		glBindVertexArray(cubeVAO);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 		glBindVertexArray(0);
 
-		modelMat = glm::mat4(1.0f);
-		modelMat = glm::translate(modelMat, glm::vec3(-15.0f, 15.0f, -2.0f));
-		myShader->SetUniform4fv("model", modelMat);
+		model = glm::mat4(1.0f);
+		model = glm::translate(model, glm::vec3(-1.0f, 0.0f, 2.0));
+		model = glm::rotate(model, glm::radians(60.0f), glm::normalize(glm::vec3(1.0, 0.0, 1.0)));
+		model = glm::scale(model, glm::vec3(0.5));
+		myShader->SetUniform4fv("model", model);
 		glBindVertexArray(cubeVAO);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 		glBindVertexArray(0);
